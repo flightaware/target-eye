@@ -1,0 +1,6 @@
+-c base.txt dev.txt
+
+pytest
+pytest-asyncio
+pytest-xdist
+hypothesis

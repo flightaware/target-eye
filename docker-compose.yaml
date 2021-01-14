@@ -1,0 +1,21 @@
+# Compose file for Target eye 
+# Configuration can be set in the .env file
+
+version: '3.7'
+
+services:
+  target_eye:
+    env_file: .env
+    image: "target_eye:${IMAGE_VERSION}"
+    logging:
+        driver: "syslog"
+        options:
+            tag: "{{.Name}}"
+            mode: "non-blocking"
+    restart: always
+    container_name: target_eye
+    user: "${CONTAINER_UID}:${CONTAINER_UID}"
+    ports:
+      - "${BIND_PORT_HOST}:${BIND_PORT_CONTAINER}"
+    volumes:
+      - "${FILE_SD_DIR_HOST}:${FILE_SD_DIRECTORY}"

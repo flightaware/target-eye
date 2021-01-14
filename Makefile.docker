@@ -1,0 +1,50 @@
+NAME=target_eye
+IMAGE=$(NAME)
+
+.PHONY: docker-setup docker-build docker-push-fa docker-pull-fa syslog docker-run docker-start docker-stop
+
+include .env
+
+SSHVARS?=default
+
+NOCACHE?=false
+
+TARGET?=prod
+
+TARGET_EYE_BRANCH?=master
+
+docker-setup: venv pip-sync-base
+
+docker-build:
+	DOCKER_BUILDKIT=1 docker build --ssh $(SSHVARS) \
+			--target=$(TARGET) \
+			--no-cache=$(NOCACHE) \
+			--build-arg BUILD_DATE=`date -u +"%Y-%m-%d"` \
+			--build-arg IMAGE=$(IMAGE) \
+			--build-arg VERSION=$(IMAGE_VERSION) \
+			--build-arg TARGET_EYE_BRANCH=$(TARGET_EYE_BRANCH) \
+			--build-arg CONTAINER_USER=$(CONTAINER_USER) \
+			--build-arg CONTAINER_UID=$(CONTAINER_UID) \
+			-t "$(IMAGE):$(IMAGE_VERSION)" \
+			-t "$(IMAGE):latest" \
+			.
+
+docker-run:
+	docker-compose up -d
+
+docker-start: docker-run
+
+docker-stop:
+	docker-compose down
+
+docker-push-fa:
+	docker push "$(IMAGE):$(IMAGE_VERSION)"
+	docker push "$(IMAGE):latest"
+
+docker-pull-fa:
+	docker pull "$(IMAGE):$(IMAGE_VERSION)"
+
+syslog:
+	@install -o root -g root -m 0644 logs/rsyslog.d/11-$(NAME).conf /etc/rsyslog.d/11-$(NAME).conf
+	@install -o root -g root -m 0644 logs/logrotate.d/$(NAME) /etc/logrotate.d/$(NAME)
+	systemctl restart rsyslog && systemctl restart logrotate

@@ -1,0 +1,7 @@
+/var/log/target_eye.log {
+    missingok
+    daily
+    create 0644
+    rotate 30
+    compress
+}

@@ -1,0 +1,7 @@
+[hypercorn]
+bind = "127.0.0.1:12345"
+loglevel = "info"
+accesslog = "-"
+
+[target-eye]
+file_sd_directory = "venv/etc/prometheus/file_sd"
